@@ -1,0 +1,30 @@
+Comments:
+
+As the first cover slide, regarding the first days of the year shows, there is an increase in the quantity of orders after the two first days approximately twice the previous days' orders, 
+as well as there is a reduction to the orders on the pulbic holiday (6th Jan). 
+Despite the descrease in the orders the days 01,02 & 06, the average basket size is the highest of all the other days having a difference of 2 euros per basket size. 
+The mobile share is constantly at the same level (≈ 85% of the total orders) and 6/10 customers use the online payment method (cards etc).
+
+It is observed - throughout second cover slide - a breakdown in the average basket size for the first week of the year comparing to the previous week to all the top cities. 
+The top 3 cities per quantity of orders (Athens, Thessaloniki & Rodos) seems to have an increase in their orders. 
+
+
+
+Improvements: 
+
+1. An additional insight would be the KPI of Offers (i.e 1+1, shop's offers) in relation with the total orders per city. 
+2. An indicator referring to a campaign performance, could be populated to our view in order to compare with the previous week statistics, if there is an increase in the orders. 
+3. The existing layout should be improved based on the data line colors. 
+For instance, if we want to keep the differrent versions of blue colors in first cover slide, we have to change the background color to white in order lines to be more visible. 
+
+
+Outcome: 
+On the public holidays and the new year's eve day, the quantity of orders is expected to be lower than the other days. 
+
+
+
+
+
+
+
+

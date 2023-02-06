@@ -1,0 +1,218 @@
+
+--- Comments ---
+/* select city, sum(amount)/count(order_id) as efood_Basket, count(order_id) as Number_of_City_Orders
+from `efood2022-376720.main_assessment.orders`
+group by city
+having Number_of_City_Orders >1000;
+
+
+select city, sum(amount)/count(order_id) as breakfast_Basket, count(order_id) as Number_of_City_Orders
+from `efood2022-376720.main_assessment.orders`
+where cuisine= "Breakfast"
+group by city;
+
+*/
+
+
+
+-- In order to build efood_basket & efood_freq ---
+
+drop table if exists `efood2022-376720.main_assessment.efood_orders`;
+
+CREATE TABLE `efood2022-376720.main_assessment.efood_orders` AS (
+  SELECT
+   city, 
+   sum(amount)/count(order_id) as efood_Basket, 
+   count(order_id)/count (distinct user_id) as efood_freq, 
+   count(order_id) as Number_of_City_Orders
+from `efood2022-376720.main_assessment.orders`
+group by city
+having Number_of_City_Orders >1000
+);
+
+-- select * from `efood2022-376720.main_assessment.efood_orders`; --
+
+-- In order to build breakfast_basket & breakfast_freq ---
+
+
+drop table if exists `efood2022-376720.main_assessment.Breakfast_orders`;
+
+CREATE TABLE `efood2022-376720.main_assessment.Breakfast_orders` AS (
+  SELECT
+   city, 
+   sum(amount)/count(order_id) as breakfast_Basket, 
+   count(order_id)/count (distinct user_id) as breakfast_freq, 
+   count(order_id) as Number_of_City_Orders
+from `efood2022-376720.main_assessment.orders`
+where cuisine= "Breakfast"
+group by city
+);
+
+-- select * from `efood2022-376720.main_assessment.Breakfast_orders`; --
+
+-- Merged Results in a view ---
+
+
+select `efood2022-376720.main_assessment.Breakfast_orders`.city, `efood2022-376720.main_assessment.Breakfast_orders`.breakfast_Basket, `efood2022-376720.main_assessment.Breakfast_orders`.breakfast_freq,  `efood2022-376720.main_assessment.efood_orders`.efood_Basket, `efood2022-376720.main_assessment.efood_orders`.efood_freq
+from `efood2022-376720.main_assessment.Breakfast_orders`, `efood2022-376720.main_assessment.efood_orders`
+where `efood2022-376720.main_assessment.efood_orders`.city = `efood2022-376720.main_assessment.Breakfast_orders`.city
+order by `efood2022-376720.main_assessment.Breakfast_orders`.Number_of_City_Orders DESC
+limit 5;
+
+
+
+--- In order to build users of frequency >3 ---
+
+drop table if exists `efood2022-376720.main_assessment.Users_Freq_3`;
+
+CREATE TABLE `efood2022-376720.main_assessment.Users_Freq_3` AS (
+  select city,  
+  count(*) as Users_Freq_3 from (
+    select count (distinct order_id) as c_ord, user_id, city
+from `efood2022-376720.main_assessment.orders`
+group by city, user_id
+having c_ord >3
+)
+group by city);
+
+select * from `efood2022-376720.main_assessment.Users_Freq_3`;
+
+
+drop table if exists `efood2022-376720.main_assessment.Users_Freq_3_Breakfast`;
+
+CREATE TABLE `efood2022-376720.main_assessment.Users_Freq_3_Breakfast` AS (
+  select city,  
+  count(*) as Users_Freq_3 from (
+    select count (distinct order_id) as c_ord, 
+    user_id, 
+    city
+from `efood2022-376720.main_assessment.orders`
+where cuisine='Breakfast'
+group by city, user_id
+having c_ord >3
+)
+group by city);
+
+/*
+select * from `efood2022-376720.main_assessment.Users_Freq_3`;
+select * from `efood2022-376720.main_assessment.Users_Freq_3_Breakfast`;
+*/
+
+
+--- In order to build Users ---
+
+drop table if exists `efood2022-376720.main_assessment.Users`;
+
+CREATE TABLE `efood2022-376720.main_assessment.Users` AS (
+  select count (distinct user_id) as Users,
+   city
+from `efood2022-376720.main_assessment.orders`
+group by city
+);
+
+
+
+drop table if exists `efood2022-376720.main_assessment.Breakfast_Users`;
+
+CREATE TABLE `efood2022-376720.main_assessment.Breakfast_Users` AS (
+  select count (distinct user_id) as Users, 
+  city,
+  count(order_id) as Number_of_City_Orders
+from `efood2022-376720.main_assessment.orders`
+where cuisine='Breakfast'
+group by city
+);
+
+
+/*
+select * from `efood2022-376720.main_assessment.Users_Freq_3`;
+select * from `efood2022-376720.main_assessment.Breakfast_Users`;
+*/
+
+---
+
+
+drop table if exists `efood2022-376720.main_assessment.Freq3_Users`;
+
+create table `efood2022-376720.main_assessment.Freq3_Users` as (
+select `efood2022-376720.main_assessment.Users_Freq_3`.Users_Freq_3/`efood2022-376720.main_assessment.Users`.Users as efood_users3freq_perc, `efood2022-376720.main_assessment.Users`.city
+from `efood2022-376720.main_assessment.Users`, `efood2022-376720.main_assessment.Users_Freq_3`
+where `efood2022-376720.main_assessment.Users`.city = `efood2022-376720.main_assessment.Users_Freq_3`.city
+);
+
+
+select * from `efood2022-376720.main_assessment.Freq3_Users`;
+
+drop table if exists `efood2022-376720.main_assessment.Breakfast_Freq3_Users`;
+
+create table `efood2022-376720.main_assessment.Breakfast_Freq3_Users` as (
+select `efood2022-376720.main_assessment.Users_Freq_3_Breakfast`.Users_Freq_3/`efood2022-376720.main_assessment.Breakfast_Users`.Users as breakfast_users3freq_perc, `efood2022-376720.main_assessment.Breakfast_Users`.city, `efood2022-376720.main_assessment.Breakfast_Users`.Number_of_City_Orders
+from `efood2022-376720.main_assessment.Breakfast_Users`, `efood2022-376720.main_assessment.Users_Freq_3_Breakfast`
+where `efood2022-376720.main_assessment.Breakfast_Users`.city = `efood2022-376720.main_assessment.Users_Freq_3_Breakfast`.city
+);
+
+select * from `efood2022-376720.main_assessment.Breakfast_Freq3_Users`;
+
+
+--- Results for %Users that exceed 3 orders ---
+
+select `efood2022-376720.main_assessment.Breakfast_Freq3_Users`.city, `efood2022-376720.main_assessment.Breakfast_Freq3_Users`.breakfast_users3freq_perc, `efood2022-376720.main_assessment.Freq3_Users`.efood_users3freq_perc
+from `efood2022-376720.main_assessment.Breakfast_Freq3_Users`, `efood2022-376720.main_assessment.Freq3_Users`
+where `efood2022-376720.main_assessment.Freq3_Users`.city = `efood2022-376720.main_assessment.Breakfast_Freq3_Users`.city
+order by `efood2022-376720.main_assessment.Breakfast_Freq3_Users`.Number_of_City_Orders DESC
+limit 5;
+
+
+
+---------------------------------------------------
+
+---- Query 2 ----
+
+
+create table `efood2022-376720.main_assessment.rank` as (
+  select count(order_id) as Arithmos_Paraggeliwn, 
+  city, 
+  user_id
+from `efood2022-376720.main_assessment.orders`
+group by city, user_id
+order by Arithmos_Paraggeliwn desc
+);
+
+--- select * from  `efood2022-376720.main_assessment.rank`; ---
+
+--- Total Orders --- 
+CREATE TABLE `efood2022-376720.main_assessment.orders_per_city` as (
+  select count(user_id) as count_user_id, 
+  city
+from `efood2022-376720.main_assessment.orders`
+group by city
+);
+
+
+
+ CREATE TABLE `efood2022-376720.main_assessment.top_10_orders_per_city` AS (
+   select city, 
+   sum(Arithmos_Paraggeliwn) as Sum_Arithmos_Paraggeliwn from (
+     SELECT city,
+     Arithmos_Paraggeliwn,
+     user_id,
+     row_number() OVER (PARTITION BY city ORDER BY Arithmos_Paraggeliwn DESC) AS rank 
+ FROM `efood2022-376720.main_assessment.rank`
+ )
+ where rank<=10
+ group by city
+ );
+ 
+
+ --- select * from `efood2022-376720.main_assessment.top_10_orders_per_city`; ---
+
+
+--- Final Table with Result ---
+
+select `efood2022-376720.main_assessment.top_10_orders_per_city`.Sum_Arithmos_Paraggeliwn/`efood2022-376720.main_assessment.orders_per_city`.count_user_id as Perc_contribution, `efood2022-376720.main_assessment.top_10_orders_per_city`.city
+from  `efood2022-376720.main_assessment.top_10_orders_per_city`, `efood2022-376720.main_assessment.orders_per_city`
+where `efood2022-376720.main_assessment.top_10_orders_per_city`.city=`efood2022-376720.main_assessment.orders_per_city`.city
+order by Perc_contribution DESC;
+
+
+

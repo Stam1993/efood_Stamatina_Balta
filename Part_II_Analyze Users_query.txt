@@ -1,0 +1,48 @@
+
+
+--- Query Part II ---
+
+--- Flag Segment based on Frequency ---
+
+--- Extract this table as Frequency_table in order to import the results in PowerBI ---
+
+select `efood2022-376720.main_assessment.Breakfast_orders`.city, `efood2022-376720.main_assessment.Breakfast_orders`.breakfast_Basket, `efood2022-376720.main_assessment.Breakfast_orders`.breakfast_freq,  `efood2022-376720.main_assessment.efood_orders`.efood_Basket, `efood2022-376720.main_assessment.efood_orders`.efood_freq
+from `efood2022-376720.main_assessment.Breakfast_orders`, `efood2022-376720.main_assessment.efood_orders`
+where `efood2022-376720.main_assessment.efood_orders`.city = `efood2022-376720.main_assessment.Breakfast_orders`.city
+order by `efood2022-376720.main_assessment.Breakfast_orders`.Number_of_City_Orders DESC;
+
+
+
+--- Flag Segment based on Basket and Order Value ---
+--- Extract this table as "Segment 2" in order to import the results in PowerBI ---
+
+select city,
+user_id, 
+sum(amount) as amount_per_user, 
+count(order_id) as orders_per_user, 
+sum(amount)/count(order_id) as basket,
+case 
+when sum(amount)/count(order_id)>=25.00 then 'High Basket'
+when sum(amount)/count(order_id)<25.00 and sum(amount)/count(order_id)>=10.00 then 'Medium Basket'
+else 'Low Basket'
+end 
+as KPI_Basket, 
+case 
+when sum(amount)>=100.00 then 'High Order Value'
+when sum(amount)<100.00 and sum(amount)>=50.00 then 'Medium Order Value'
+else 'Low Order Value'
+end 
+as KPI_Order_Value
+from `efood2022-376720.main_assessment.orders`
+where cuisine='Breakfast'
+group by user_id, city
+order by amount_per_user desc;
+
+
+
+
+
+
+
+
+
